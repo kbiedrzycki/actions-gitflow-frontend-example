@@ -11,9 +11,10 @@ on:
       - develop
 
 jobs:
-  env:
-    CI: true
   build:
+    env:
+      CI: true
+
     runs-on: ubuntu-latest
 
     strategy:
