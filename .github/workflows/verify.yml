@@ -40,7 +40,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Linter
-        run: yarn linter
+        run: yarn lint
 
       - name: Unit tests
         run: yarn test
