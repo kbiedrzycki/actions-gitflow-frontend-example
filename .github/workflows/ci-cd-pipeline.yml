@@ -57,8 +57,8 @@ jobs:
       - name: Verify cache
         run: yarn cache list
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+#      - name: Install dependencies
+#        run: yarn install --frozen-lockfile
 
       - name: Linter
         run: yarn lint
