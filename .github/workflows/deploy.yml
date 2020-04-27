@@ -1,15 +1,15 @@
-name: Integrate
+name: Deploy
 
 on:
-  pull_request:
+  push:
     branches:
       - master
       - develop
 
 jobs:
-  verify:
+  build:
     env:
-      CI: true
+      NODE_ENV: production
 
     runs-on: ubuntu-latest
 
@@ -35,8 +35,22 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Linter
-        run: yarn lint
+      - name: Build project
+        run: yarn build
+  staging_deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
 
-      - name: Unit tests
-        run: yarn test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        run: echo "Deploying to staging..."
+
+  production_deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        run: echo "Deploying to production..."
