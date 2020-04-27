@@ -1,13 +1,16 @@
-name: Integrate
+name: CI/CD pipeline
 
 on:
   pull_request:
     branches:
       - master
       - develop
+  push:
+    branches:
+      - master
 
 jobs:
-  verify:
+  prepare:
     env:
       CI: true
 
@@ -15,12 +18,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Use defined Node version
+      - name: Use defined node version
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
 
-      - name: Cache node modules
+      - name: Dependencies cache
         uses: actions/cache@v1
         env:
           cache-name: node-modules-cache
@@ -32,11 +35,35 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+  verify:
+    if: github.event_name == 'pull_request'
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Linter
         run: yarn lint
 
       - name: Unit tests
         run: yarn test
+
+  deploy_production:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+
+    steps:
+      - name: Build project
+        run: yarn build
+
+      - name: List files
+        run: tree -L 2 && ls -lap
+
+      - name: Deploy
+        run: echo "Deploying to $NODE_ENV..."
