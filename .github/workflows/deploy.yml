@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - develop
 
 jobs:
   build:
@@ -37,18 +36,8 @@ jobs:
 
       - name: Build project
         run: yarn build
-  staging_deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
 
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy
-        run: echo "Deploying to staging..."
-
-  production_deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
