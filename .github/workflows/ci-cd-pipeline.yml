@@ -61,6 +61,9 @@ jobs:
           path: ${{ needs.prepare.outputs.yarn-cache-dir-path }}
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
 
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
       - name: Linter
         run: yarn lint
 
