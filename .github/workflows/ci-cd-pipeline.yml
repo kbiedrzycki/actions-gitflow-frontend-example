@@ -89,7 +89,7 @@ jobs:
         run: yarn build
 
       - name: List files
-        run: tree -L 2 && ls -lap
+        run: ls -lap && ls -lap ./build
 
       - name: Deploy
         run: echo "Deploying to $NODE_ENV..."
