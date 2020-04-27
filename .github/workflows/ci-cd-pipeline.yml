@@ -54,11 +54,8 @@ jobs:
           path: ~/.cache/yarn
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Verify cache
-        run: yarn cache list
-
-#      - name: Install dependencies
-#        run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
       - name: Linter
         run: yarn lint
@@ -67,7 +64,7 @@ jobs:
         run: yarn test
 
   deploy_production:
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+#    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
     needs: prepare
     runs-on: ubuntu-latest
 
