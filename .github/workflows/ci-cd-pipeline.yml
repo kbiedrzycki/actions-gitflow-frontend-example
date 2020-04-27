@@ -88,8 +88,10 @@ jobs:
       - name: Build project
         run: yarn build
 
-      - name: List files
-        run: ls -lap && ls -lap ./build
+      - uses: actions/upload-artifact@v1
+        with:
+          name: release
+          path: ./build
 
       - name: Deploy
         run: echo "Deploying to $NODE_ENV..."
