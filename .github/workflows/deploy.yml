@@ -38,8 +38,9 @@ jobs:
         run: yarn build
 
   deploy:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy
-        run: echo "Deploying to production..."
+        run: echo "Deploying to $NODE_ENV..."
