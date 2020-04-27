@@ -16,6 +16,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    outputs:
+      yarn-cache-dir-path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+
     steps:
       - uses: actions/checkout@v2
       - name: Use defined node version
@@ -23,12 +26,16 @@ jobs:
         with:
           node-version: '12.x'
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
       - name: Dependencies cache
         uses: actions/cache@v1
         env:
           cache-name: node-modules-cache
         with:
-          path: ~/.cache/yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -51,12 +58,8 @@ jobs:
         env:
           cache-name: node-modules-cache
         with:
-          path: ~/.cache/yarn
+          path: ${{ needs.prepare.outputs.yarn-cache-dir-path }}
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
 
       - name: Linter
         run: yarn lint
