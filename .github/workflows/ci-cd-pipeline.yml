@@ -16,8 +16,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    outputs:
-      yarn-cache-dir-path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+#    outputs:
+#      yarn-cache-dir-path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
     steps:
       - uses: actions/checkout@v2
@@ -26,21 +26,21 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Save dependencies cache
-        uses: actions/cache@v1
-        env:
-          cache-name: node-modules-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+#      - name: Get yarn cache directory path
+#        id: yarn-cache-dir-path
+#        run: echo "::set-output name=dir::$(yarn cache dir)"
+#
+#      - name: Save dependencies cache
+#        uses: actions/cache@v1
+#        env:
+#          cache-name: node-modules-cache
+#        with:
+#          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+#          restore-keys: |
+#            ${{ runner.os }}-build-${{ env.cache-name }}-
+#            ${{ runner.os }}-build-
+#            ${{ runner.os }}-
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -53,13 +53,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Read dependencies cache
-        uses: actions/cache@v1
-        env:
-          cache-name: node-modules-cache
-        with:
-          path: ${{ needs.prepare.outputs.yarn-cache-dir-path }}
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+#      - name: Read dependencies cache
+#        uses: actions/cache@v1
+#        env:
+#          cache-name: node-modules-cache
+#        with:
+#          path: ${{ needs.prepare.outputs.yarn-cache-dir-path }}
+#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -81,13 +81,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Read dependencies cache
-        uses: actions/cache@v1
-        env:
-          cache-name: node-modules-cache
-        with:
-          path: ${{ needs.prepare.outputs.yarn-cache-dir-path }}
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+#      - name: Read dependencies cache
+#        uses: actions/cache@v1
+#        env:
+#          cache-name: node-modules-cache
+#        with:
+#          path: ${{ needs.prepare.outputs.yarn-cache-dir-path }}
+#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
