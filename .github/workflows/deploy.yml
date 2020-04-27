@@ -1,15 +1,14 @@
-name: Integrate
+name: Deploy
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-      - develop
 
 jobs:
-  verify:
+  build:
     env:
-      CI: true
+      NODE_ENV: production
 
     runs-on: ubuntu-latest
 
@@ -35,8 +34,13 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Linter
-        run: yarn lint
+      - name: Build project
+        run: yarn build
 
-      - name: Unit tests
-        run: yarn test
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        run: echo "Deploying to $NODE_ENV..."
