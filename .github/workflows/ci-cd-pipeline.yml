@@ -63,8 +63,36 @@ jobs:
       - name: Unit tests
         run: yarn test
 
-  deploy_production:
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+  staging_deploy:
+    if: github.event_name == "pull_request" && contains(github.ref, "/release/")
+    needs: [prepare, verify]
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read dependencies cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules-cache
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Deploy to staging
+        run: /.deploy.sh staging
+
+  production_deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: prepare
     runs-on: ubuntu-latest
 
@@ -88,5 +116,8 @@ jobs:
       - name: Build project
         run: yarn build
 
-      - name: Deploy
-        run: echo "Deploying to production"
+      - name: Deploy to staging
+        run: /.deploy.sh staging
+
+      - name: Deploy to production
+        run: ./deploy.sh production
