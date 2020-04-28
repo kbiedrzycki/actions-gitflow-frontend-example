@@ -39,7 +39,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
   integrate:
-    if: github.event_name == 'pull_request'
+#    if: github.event_name == 'pull_request'
     needs: prepare
     runs-on: ubuntu-latest
 
