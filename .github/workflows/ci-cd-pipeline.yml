@@ -1,4 +1,4 @@
-name: Integrate code
+name: CI/CD pipeline
 
 on:
   pull_request:
@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-  verify:
+  integrate:
     if: github.event_name == 'pull_request'
     needs: prepare
     runs-on: ubuntu-latest
@@ -63,12 +63,34 @@ jobs:
       - name: Unit tests
         run: yarn test
 
-      - uses: octokit/request-action@v2.x
-        name: Trigger deploy
+  deploy:
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')))
+    needs: integrate
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read dependencies cache
+        uses: actions/cache@v1
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+          cache-name: node-modules-cache
         with:
-          route: POST /repos/:repository/dispatches
-          repository: ${{ github.repository }}
-          event_type: "deploy_staging"
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Deploy to staging
+        run: ./deploy.sh staging
+
+      - name: Deploy to production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: ./deploy.sh production
