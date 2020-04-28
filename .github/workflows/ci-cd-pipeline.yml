@@ -92,7 +92,7 @@ jobs:
         run: yarn test
 
   staging_deploy:
-    if: github.event_name == 'pull_request' && contains(github.ref, '/create-single/')
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'create-single')
     needs: [prepare, verify]
     runs-on: ubuntu-latest
 
