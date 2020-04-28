@@ -71,4 +71,5 @@ jobs:
         with:
           route: POST /repos/:repository/dispatches
           repository: ${{ github.repository }}
-          event_type: "deploy_staging"
+          body: '{"event_type": "deploy_staging"}'
+
