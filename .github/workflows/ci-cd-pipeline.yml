@@ -64,10 +64,7 @@ jobs:
         run: yarn test
 
   deploy:
-    if: (
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/'))
-    )
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')))
     needs: integrate
     runs-on: ubuntu-latest
 
