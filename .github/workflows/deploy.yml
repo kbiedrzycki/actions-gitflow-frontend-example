@@ -1,7 +1,7 @@
 name: Deploy
 
 on: repository_dispatch
-  types: [staging_deploy, production_deploy]
+#  types: [staging_deploy, production_deploy]
 
 jobs:
   debug:
