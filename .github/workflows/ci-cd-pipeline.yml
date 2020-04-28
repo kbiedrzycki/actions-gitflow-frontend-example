@@ -91,7 +91,7 @@ jobs:
       - name: Unit tests
         run: yarn test
 
-  staging_deploy:
+  release_deploy:
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'create-single')
     needs: [prepare, verify]
     runs-on: ubuntu-latest
@@ -117,9 +117,9 @@ jobs:
         run: yarn build
 
       - name: Deploy to staging
-        run: /.deploy.sh staging
+        run: ./deploy.sh staging
 
-  production_deploy:
+  master_deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: prepare
     runs-on: ubuntu-latest
@@ -145,7 +145,7 @@ jobs:
         run: yarn build
 
       - name: Deploy to staging
-        run: /.deploy.sh staging
+        run: ./deploy.sh staging
 
       - name: Deploy to production
         run: ./deploy.sh production
