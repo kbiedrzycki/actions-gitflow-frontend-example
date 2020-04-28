@@ -1,7 +1,9 @@
 name: Deploy code
 
 on:
-  repository_dispatch
+  repository_dispatch:
+    types:
+      - deploy_staging
   push:
     branches:
       - master
