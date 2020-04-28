@@ -1,11 +1,9 @@
 name: Deploy code
 
-on:
-  repository_dispatch:
-    types: deploy_staging
-  push:
-    branches:
-      - master
+on: repository_dispatch
+#  push:
+#    branches:
+#      - master
 
 jobs:
   debug:
