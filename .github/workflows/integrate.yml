@@ -1,0 +1,74 @@
+name: Integrate code
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+
+jobs:
+  prepare:
+    env:
+      CI: true
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use defined node version
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Save dependencies cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules-cache
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+  verify:
+    if: github.event_name == 'pull_request'
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read dependencies cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules-cache
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Linter
+        run: yarn lint
+
+      - name: Unit tests
+        run: yarn test
+
+      - uses: octokit/request-action@v2.x
+        name: Trigger deploy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+        with:
+          route: POST /repos/:repository/dispatches
+          repository: ${{ github.repository }}
+          event_type: "deploy_staging"
