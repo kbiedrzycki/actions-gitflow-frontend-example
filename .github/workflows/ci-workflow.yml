@@ -73,7 +73,7 @@ jobs:
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
-          deployment_id: ${{ github.event.deployment.id }}
+          required_contexts: "[]"
           environment: "staging"
           ref: ${{ github.head_ref }}
 
@@ -90,7 +90,6 @@ jobs:
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
-          deployment_id: ${{ github.event.deployment.id }}
           environment: "staging"
           ref: "master"
 
@@ -101,6 +100,5 @@ jobs:
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
-          deployment_id: ${{ github.event.deployment.id }}
           environment: "production"
           ref: "master"
