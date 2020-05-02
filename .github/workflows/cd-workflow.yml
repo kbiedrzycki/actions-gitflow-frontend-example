@@ -47,7 +47,6 @@ jobs:
           state: "success"
 
   production_deployment:
-    needs: staging_deployment
     if: github.event.action == 'created' && github.event.deployment.environment == 'production'
     runs-on: ubuntu-latest
 
