@@ -14,17 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Read dependencies cache
-        uses: actions/cache@v1
-        env:
-          cache-name: node-modules-cache
-        with:
-          path: ~/.cache/yarn
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
       - name: Deploy to staging
         run: ./deploy.sh staging
 
@@ -48,17 +37,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Read dependencies cache
-        uses: actions/cache@v1
-        env:
-          cache-name: node-modules-cache
-        with:
-          path: ~/.cache/yarn
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
 
       - name: Deploy to production
         run: ./deploy.sh production
