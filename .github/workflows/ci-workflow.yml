@@ -1,4 +1,4 @@
-name: CI/CD pipeline
+name: Continuous Integration
 
 on:
   pull_request:
@@ -11,9 +11,6 @@ on:
 
 jobs:
   prepare:
-    env:
-      CI: true
-
     runs-on: ubuntu-latest
 
     steps:
@@ -38,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-  integrate:
-#    if: github.event_name == 'pull_request'
+  integration:
+    if: github.event_name == 'pull_request'
     needs: prepare
     runs-on: ubuntu-latest
 
@@ -63,34 +60,45 @@ jobs:
       - name: Unit tests
         run: yarn test
 
-  deploy:
-    if: ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')))
-    needs: integrate
+  staging_deployment:
+    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+    needs: integration
     runs-on: ubuntu-latest
 
-    env:
-      NODE_ENV: production
+    steps:
+      - name: Trigger staging deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          required_contexts: "[]"
+          environment: "staging"
+          ref: ${{ github.head_ref }}
+
+  production_deployment:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: prepare
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Read dependencies cache
-        uses: actions/cache@v1
+      - name: Trigger staging deployment
+        uses: octokit/request-action@v2.x
         env:
-          cache-name: node-modules-cache
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          path: ~/.cache/yarn
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          environment: "staging"
+          ref: "master"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build project
-        run: yarn build
-
-      - name: Deploy to staging
-        run: ./deploy.sh staging
-
-      - name: Deploy to production
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: ./deploy.sh production
+      - name: Trigger production deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          environment: "production"
+          ref: "master"

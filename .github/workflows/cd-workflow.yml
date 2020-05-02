@@ -1,0 +1,82 @@
+name: Continuous Deployment
+
+on: deployment
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+  staging_deployment:
+    if: github.event.action == 'created' && github.event.deployment.environment == 'staging'
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+      TARGET_ENV: staging
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read dependencies cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules-cache
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Deploy to staging
+        run: ./deploy.sh staging
+
+      - name: Update deployment status
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments/:deployment_id/statuses
+          repository: ${{ github.repository }}
+          deployment_id: ${{ github.event.deployment.id }}
+          state: "success"
+
+  production_deployment:
+    if: github.event.action == 'created' && github.event.deployment.environment == 'production'
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+      TARGET_ENV: production
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read dependencies cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules-cache
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Deploy to production
+        run: ./deploy.sh production
+
+      - name: Update deployment status
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments/:deployment_id/statuses
+          repository: ${{ github.repository }}
+          deployment_id: ${{ github.event.deployment.id }}
+          state: "success"
