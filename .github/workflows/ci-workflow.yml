@@ -86,7 +86,7 @@ jobs:
       - name: Trigger staging deployment
         uses: octokit/request-action@v2.x
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
@@ -96,7 +96,7 @@ jobs:
       - name: Trigger production deployment
         uses: octokit/request-action@v2.x
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}

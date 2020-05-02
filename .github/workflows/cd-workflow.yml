@@ -3,14 +3,6 @@ name: Continuous Deployment
 on: deployment
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
   staging_deployment:
     if: github.event.action == 'created' && github.event.deployment.environment == 'staging'
     runs-on: ubuntu-latest
@@ -39,7 +31,7 @@ jobs:
       - name: Update deployment status
         uses: octokit/request-action@v2.x
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           route: POST /repos/:repository/deployments/:deployment_id/statuses
           repository: ${{ github.repository }}
@@ -74,7 +66,7 @@ jobs:
       - name: Update deployment status
         uses: octokit/request-action@v2.x
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           route: POST /repos/:repository/deployments/:deployment_id/statuses
           repository: ${{ github.repository }}
