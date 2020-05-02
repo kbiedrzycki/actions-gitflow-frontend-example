@@ -40,9 +40,10 @@ jobs:
         uses: octokit/request-action@v2.x
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        route: POST /repos/:repository/deployments/:deployment_id/statuses
-        deployment_id: ${{ github.event.deployment.id }}
-        state: "success"
+        with:
+          route: POST /repos/:repository/deployments/:deployment_id/statuses
+          deployment_id: ${{ github.event.deployment.id }}
+          state: "success"
 
   production_deployment:
     needs: staging_deployment
@@ -74,6 +75,7 @@ jobs:
         uses: octokit/request-action@v2.x
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        route: POST /repos/:repository/deployments/:deployment_id/statuses
-        deployment_id: ${{ github.event.deployment.id }}
-        state: "success"
+        with:
+          route: POST /repos/:repository/deployments/:deployment_id/statuses
+          deployment_id: ${{ github.event.deployment.id }}
+          state: "success"
