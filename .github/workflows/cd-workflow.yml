@@ -11,34 +11,34 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
-#  staging_deployment:
-#    if:
-#    runs-on: ubuntu-latest
-#
-#    env:
-#      NODE_ENV: production
-#      TARGET_ENV: staging
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#
-#      - name: Read dependencies cache
-#        uses: actions/cache@v1
-#        env:
-#          cache-name: node-modules-cache
-#        with:
-#          path: ~/.cache/yarn
-#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-#
-#      - name: Install dependencies
-#        run: yarn install --frozen-lockfile
-#
-#      - name: Build project
-#        run: yarn build
-#
-#      - name: Deploy to staging
-#        run: ./deploy.sh staging
-#
+  staging_deployment:
+    if: github.event.action == 'created' && (github.event.deployment.environment == 'staging' || github.event.deployment.environment == 'production')
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+      TARGET_ENV: staging
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read dependencies cache
+        uses: actions/cache@v1
+        env:
+          cache-name: node-modules-cache
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Deploy to staging
+        run: ./deploy.sh staging
+
 #  production_deployment:
 #    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 #    runs-on: ubuntu-latest
