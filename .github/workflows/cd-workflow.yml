@@ -12,7 +12,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
 
   staging_deployment:
-    if: github.event.action == 'created' && (github.event.deployment.environment == 'staging' || github.event.deployment.environment == 'production')
+    if: github.event.action == 'created' && github.event.deployment.environment == 'staging'
     runs-on: ubuntu-latest
 
     env:
@@ -78,5 +78,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           route: POST /repos/:repository/deployments/:deployment_id/statuses
+          repository: ${{ github.repository }}
           deployment_id: ${{ github.event.deployment.id }}
           state: "success"
