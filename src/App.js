@@ -11,11 +11,12 @@ function App() {
           Edit <code>src/App.js</code> and save to reload.
         </p>
         <a
+          href="http://google.com"
           className="App-link"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+          Learn React together!!
         </a>
       </header>
     </div>
