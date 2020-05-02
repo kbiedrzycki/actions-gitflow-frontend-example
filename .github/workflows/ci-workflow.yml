@@ -36,6 +36,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
   integration:
+    if: github.event_name == 'pull_request'
     needs: prepare
     runs-on: ubuntu-latest
 
@@ -53,11 +54,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run checks
-        if: github.event_name == 'pull_request'
-        run: yarn lint && yarn test
+      - name: Linter
+        run: yarn lint
 
-  deployment:
+      - name: Unit tests
+        run: yarn test
+
+  staging_deployment:
+    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
     needs: integration
     runs-on: ubuntu-latest
 
@@ -69,11 +73,27 @@ jobs:
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
+          required_contexts: []
           environment: "staging"
-          ref: ${{ github.head_ref || 'master' }}
+          ref: ${{ github.head_ref }}
+
+  production_deployment:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger staging deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          environment: "staging"
+          ref: "master"
 
       - name: Trigger production deployment
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: octokit/request-action@v2.x
         env:
           GITHUB_TOKEN: ${{ github.token }}
