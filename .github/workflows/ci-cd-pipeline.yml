@@ -38,13 +38,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-  integrate:
-#    if: github.event_name == 'pull_request'
+  integration:
     needs: prepare
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Verify branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: exit 0
 
       - name: Read dependencies cache
         uses: actions/cache@v1
@@ -63,9 +66,9 @@ jobs:
       - name: Unit tests
         run: yarn test
 
-  deploy:
+  deployment:
     if: ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')))
-    needs: integrate
+    needs: integration
     runs-on: ubuntu-latest
 
     env:
