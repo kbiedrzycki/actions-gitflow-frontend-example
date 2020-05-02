@@ -90,6 +90,7 @@ jobs:
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
+          required_contexts: "[]"
           environment: "staging"
           ref: "master"
 
@@ -100,5 +101,6 @@ jobs:
         with:
           route: POST /repos/:repository/deployments
           repository: ${{ github.repository }}
+          required_contexts: "[]"
           environment: "production"
           ref: "master"
