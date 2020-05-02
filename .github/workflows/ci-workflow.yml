@@ -75,6 +75,7 @@ jobs:
           repository: ${{ github.repository }}
           deployment_id: ${{ github.event.deployment.id }}
           environment: "staging"
+          ref: ${{ github.head_ref }}
 
   production_deployment:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -91,6 +92,7 @@ jobs:
           repository: ${{ github.repository }}
           deployment_id: ${{ github.event.deployment.id }}
           environment: "staging"
+          ref: "master"
 
       - name: Trigger production deployment
         uses: octokit/request-action@v2.x
@@ -101,3 +103,4 @@ jobs:
           repository: ${{ github.repository }}
           deployment_id: ${{ github.event.deployment.id }}
           environment: "production"
+          ref: "master"
