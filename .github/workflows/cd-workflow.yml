@@ -42,6 +42,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           route: POST /repos/:repository/deployments/:deployment_id/statuses
+          repository: ${{ github.repository }}
           deployment_id: ${{ github.event.deployment.id }}
           state: "success"
 
