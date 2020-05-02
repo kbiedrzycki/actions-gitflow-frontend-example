@@ -1,4 +1,4 @@
-name: CI/CD pipeline
+name: Continuous Integration
 
 on:
   pull_request:
@@ -11,9 +11,6 @@ on:
 
 jobs:
   prepare:
-    env:
-      CI: true
-
     runs-on: ubuntu-latest
 
     steps:
@@ -39,15 +36,12 @@ jobs:
         run: yarn install --frozen-lockfile
 
   integration:
+    if: github.event_name == 'pull_request'
     needs: prepare
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Verify branch
-        if: github.event_name == 'pull_request'
-        run: exit 0
 
       - name: Read dependencies cache
         uses: actions/cache@v1
@@ -66,34 +60,12 @@ jobs:
       - name: Unit tests
         run: yarn test
 
-  deployment:
-    if: ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')))
-    needs: integration
-    runs-on: ubuntu-latest
-
-    env:
-      NODE_ENV: production
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Read dependencies cache
-        uses: actions/cache@v1
-        env:
-          cache-name: node-modules-cache
-        with:
-          path: ~/.cache/yarn
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build project
-        run: yarn build
-
-      - name: Deploy to staging
-        run: ./deploy.sh staging
-
-      - name: Deploy to production
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: ./deploy.sh production
+#  staging_deployment:
+#    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+#    needs: integration
+#    runs-on: ubuntu-latest
+#
+#  production_deployment:
+#    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+#    needs: prepare
+#    runs-on: ubuntu-latest
