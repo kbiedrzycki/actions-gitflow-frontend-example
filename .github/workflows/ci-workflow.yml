@@ -35,6 +35,48 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+  production_deployment:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger staging deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          environment: "staging"
+          ref: "master"
+
+      - name: Trigger production deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          environment: "production"
+          ref: "master"
+
+  staging_deployment:
+    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+    needs: integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger staging deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          environment: "staging"
+          ref: ${{ github.head_ref }}
+
   integration:
     if: github.event_name == 'pull_request'
     needs: prepare
@@ -59,48 +101,3 @@ jobs:
 
       - name: Unit tests
         run: yarn test
-
-  staging_deployment:
-    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
-    needs: integration
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Trigger staging deployment
-        uses: octokit/request-action@v2.x
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          route: POST /repos/:repository/deployments
-          repository: ${{ github.repository }}
-          deployment_id: ${{ github.event.deployment.id }}
-          environment: "staging"
-          ref: ${{ github.head_ref }}
-
-  production_deployment:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: prepare
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Trigger staging deployment
-        uses: octokit/request-action@v2.x
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          route: POST /repos/:repository/deployments
-          repository: ${{ github.repository }}
-          deployment_id: ${{ github.event.deployment.id }}
-          environment: "staging"
-          ref: "master"
-
-      - name: Trigger production deployment
-        uses: octokit/request-action@v2.x
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          route: POST /repos/:repository/deployments
-          repository: ${{ github.repository }}
-          deployment_id: ${{ github.event.deployment.id }}
-          environment: "production"
-          ref: "master"
