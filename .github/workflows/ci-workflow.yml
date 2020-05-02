@@ -93,11 +93,11 @@ jobs:
           environment: "staging"
 
       - name: Trigger production deployment
-          uses: octokit/request-action@v2.x
-          env:
-            GITHUB_TOKEN: ${{ github.token }}
-          with:
-            route: POST /repos/:repository/deployments
-            repository: ${{ github.repository }}
-            deployment_id: ${{ github.event.deployment.id }}
-            environment: "production"
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          deployment_id: ${{ github.event.deployment.id }}
+          environment: "production"
