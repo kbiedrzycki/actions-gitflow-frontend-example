@@ -58,7 +58,6 @@ jobs:
         run: yarn lint && yarn test
 
   deployment:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: integration
     runs-on: ubuntu-latest
 
